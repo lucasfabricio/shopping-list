@@ -4,6 +4,8 @@
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
+const Product = use('App/Models/Product')
+
 /**
  * Resourceful controller for interacting with products
  */
@@ -21,18 +23,6 @@ class ProductController {
   }
 
   /**
-   * Render a form to be used for creating a new product.
-   * GET products/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
-  }
-
-  /**
    * Create/save a new product.
    * POST products
    *
@@ -41,6 +31,14 @@ class ProductController {
    * @param {Response} ctx.response
    */
   async store ({ request, response }) {
+    const { bar_code, description, brand } = request.all()
+    const product = await Product.create({
+      bar_code: bar_code,
+      description: description,
+      brand: brand
+    })
+
+    return product
   }
 
   /**
@@ -53,18 +51,26 @@ class ProductController {
    * @param {View} ctx.view
    */
   async show ({ params, request, response, view }) {
+
+    const product = Product.find(params.id)
+
+    return product
   }
 
-  /**
-   * Render a form to update an existing product.
-   * GET products/:id/edit
+   /**
+   * Display a single product.
+   * GET products/barcode/:bar_code
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async edit ({ params, request, response, view }) {
+  async barcode ({ params, request, response, view }) {
+
+    const product = Product.findBy('bar_code', params.bar_code)
+
+    return product
   }
 
   /**

@@ -10,7 +10,7 @@ class ProductSchema extends Schema {
       table.increments()
 
       table
-        .bigint('bar-code', 13)
+        .bigint('bar_code', 13)
         .index()
         .notNullable()
         .unique()

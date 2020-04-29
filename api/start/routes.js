@@ -23,20 +23,24 @@ Route.post('/sessions', 'SessionController.create')
 
 Route.resource('categories', 'CategoryController')
     .apiOnly()
-    .middleware('auth')
+    .middleware('auth', 'userAction')
 
 Route.resource('items', 'ItemController')
     .apiOnly()
-    .middleware('auth')
+    .middleware('auth', 'userAction')
 
 Route.resource('lists', 'ListController')
     .apiOnly()
-    .middleware('auth')
+    .middleware('auth', 'userAction')
 
 Route.get('lists/details/:id', 'ListController.details')
+    .middleware('auth')
 
 Route.resource('products', 'ProductController')
     .apiOnly()
+    .middleware('auth',)
+
+Route.get('products/barcode/:bar_code', 'ProductController.barcode')
     .middleware('auth')
 
 Route.resource('stores', 'StoreController')

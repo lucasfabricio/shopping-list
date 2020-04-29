@@ -5,6 +5,12 @@ const Model = use('Model')
 
 class List extends Model {
 
+    static scopeByUser(query, list_id, user_id){
+        return query
+            .where('id', list_id)
+            .where('user_id', user_id)
+    }
+
     user () {
         return this.belongsTo('App/Models/User')
     }

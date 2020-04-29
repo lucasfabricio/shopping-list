@@ -5,6 +5,7 @@
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
 const List = use('App/Models/List')
+const Logger = use('Logger')
 
 /**
  * Resourceful controller for interacting with lists
@@ -65,20 +66,17 @@ class ListController {
    * @param {Response} ctx.response
    */
   async update({ auth, params, request, response }) {
-
     const { id } = auth.user
-    const list = await List.findOrFail(params.id)
+    const data = request.only(['store_id'])
 
-    if (list.user_id === id) {
+    const list = await List.query().byUser(params.id, id).first()
 
-      const data = request.only(['store_id'])
-
+    if (list) {
       list.merge(data)
-
       await list.save()
-
-      return list
     }
+
+    return list
   }
 
   /**
@@ -89,9 +87,10 @@ class ListController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy({ params, request, response }) {
+  async destroy({ auth, params, request, response }) {
 
-    const list = await List.findOrFail(params.id)
+    const { id } = auth.user
+    const list = await List.query().byUser(params.id, id).first()
 
     await list.delete()
 
@@ -108,15 +107,19 @@ class ListController {
   * @param {View} ctx.view
   */
   async details({ auth, params, request, response }) {
-    
-    const { id } = auth.user
-    const list = List.query()
-      .where('id', params.id)
-      .where('user_id', id)
-      .with('categories')
-      .fetch()
 
-      return list
+    const { id } = auth.user
+    
+    const list = List.query().byUser(params.id, id)
+      .with('categories', (builder) => { 
+        builder.setHidden(['list_id', 'created_at', 'updated_at'])
+        .with('items', (builder) => {
+          builder.with('products')
+        })
+      })
+      .first()
+
+    return list
   }
 }
 

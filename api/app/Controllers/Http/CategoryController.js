@@ -21,25 +21,6 @@ class CategoryController {
    * @param {View} ctx.view
    */
   async index({ auth, request, response, view }) {
-
-    const { id } = auth.user
-    const data = request.only([
-      'user_id',
-      'list_id',
-      'name'
-    ])
-
-    if (id === data.user_id) {
-      const categories = await Category
-        .query()
-        .where('list_id', data.list_id)
-        .where('user_id', data.user_id)
-
-      return categories
-    }
-    else {
-      return response.status(401).send(data)
-    }
   }
 
   /**
@@ -50,27 +31,15 @@ class CategoryController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store({ auth, request, response }) {
+  async store({ request, response }) {
 
-    const { id } = auth.user
+    const { list_id, name } = request.all()
+    const category = await Category.create({
+      list_id: list_id,
+      name: name
+    })
 
-    const data = request.only([
-      'user_id',
-      'list_id',
-      'name'
-    ])
-
-    if (id === data.user_id) {
-      const category = await Category.create({
-        list_id: data.list_id,
-        name: data.name
-      })
-
-      return category
-    }
-    else {
-      return response.status(401).send(data)
-    }
+    return category
   }
 
   /**
@@ -93,26 +62,17 @@ class CategoryController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update({ auth, params, request, response }) {
-
-    const { id } = auth.user
+  async update({ params, request, response }) {
 
     const data = request.only([
-      'user_id',
       'name'
     ])
 
-    if (id === data.user_id) {
-      const category = await Category.findOrFail(params.id)
-      category.merge(data)
+    const category = await Category.find(params.id)
+    category.merge(data)
+    await category.save()
 
-      await category.save()
-
-      return category
-    }
-    else {
-      return response.status(401).send(data)
-    }
+    return category
   }
 
   /**
@@ -123,23 +83,12 @@ class CategoryController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy({ auth, params, request, response }) {
+  async destroy({ params, request, response }) {
 
-    const { id } = auth.user
+    const category = await Category.find(params.id)
+    await category.delete()
 
-    const data = request.only([
-      'user_id'
-    ])
-
-    if (id === data.user_id) {
-      const category = await Category.findOrFail(params.id)
-      await category.delete()
-
-      return category
-    }
-    else {
-      return response.status(401).send(data)
-    }
+    return category
   }
 }
 
